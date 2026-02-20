@@ -1,16 +1,24 @@
 package com.delivery;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class OrderEvent {
+    @Schema(description = "ID do pedido gerado pelo servidor", accessMode = Schema.AccessMode.READ_ONLY)
     private String orderId;
+
     private String customerName;
     private String restaurant;
+
+   
     private double amount;
+
+    @Schema(description = "Status atualizado pelo servidor", accessMode = Schema.AccessMode.READ_ONLY)
     private String status;
 
-    // Construtor vazio (obrigatório para o Jackson/JSON)
+    
     public OrderEvent() {}
 
-    // Construtor completo
+    
     public OrderEvent(String orderId, String customerName, String restaurant, double amount, String status) {
         this.orderId = orderId;
         this.customerName = customerName;
@@ -19,7 +27,7 @@ public class OrderEvent {
         this.status = status;
     }
 
-    // Getters e Setters (importante ter os Setters para o Consumer ler o JSON)
+    
     public String getOrderId() { return orderId; }
     public void setOrderId(String orderId) { this.orderId = orderId; }
     public String getCustomerName() { return customerName; }
