@@ -1,6 +1,7 @@
 package com.delivery;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.time.Duration;
 
@@ -23,7 +24,7 @@ public class PayConsumer {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Collections.singletonList("pedido-aprovado"));
+        consumer.subscribe(Arrays.asList("pedido-aprovado"));
 
         ObjectMapper mapper = new ObjectMapper();
 
@@ -34,26 +35,28 @@ public class PayConsumer {
 
         KafkaProducer<String, String> producer = new KafkaProducer<>(prodProps);
 
+        // Register handlers - open for extension
+        List<EventHandler> handlers = Arrays.asList(
+            new PedidoAprovadoHandler()
+        );
+
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
             for (ConsumerRecord<String, String> record : records) {
                 OrderEvent event = mapper.readValue(record.value(), OrderEvent.class);
 
-                if(event.getAmount() > 100) {
-                    System.out.println("Pagamento recusado para o pedido " + event.getOrderId() + " (valor acima do permitido)");
-                    event.setStatus("CANCELADO");
-                    
-                    String jsonAtt = mapper.writeValueAsString(event);
-                    ProducerRecord<String, String> cancelRecord = new ProducerRecord<>("pedido-cancelado", event.getOrderId(), jsonAtt);
-                    producer.send(cancelRecord);
-                } else {
-                    System.out.println("Pagamento aprovado para o pedido " + event.getOrderId());
-                    event.setStatus("PAGO");
+                boolean handled = false;
+                for (EventHandler handler : handlers) {
+                    if (handler.canHandle(record.topic())) {
+                        handler.handle(event, producer);
+                        handled = true;
+                        break;
+                    }
+                }
 
-                    String jsonAtt = mapper.writeValueAsString(event);
-                    ProducerRecord<String, String> paidRecord = new ProducerRecord<>("pedido-pago", event.getOrderId(), jsonAtt);
-                    producer.send(paidRecord);
+                if (!handled) {
+                    System.out.println("Evento não tratado no tópico: " + record.topic());
                 }
             }
 

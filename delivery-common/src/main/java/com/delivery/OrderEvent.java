@@ -1,10 +1,18 @@
 package com.delivery;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 public class OrderEvent {
+    @Schema(description = "ID do pedido gerado pelo servidor", accessMode = Schema.AccessMode.READ_ONLY)
     private String orderId;
+
     private String customerName;
     private String restaurant;
+
+    // Mantemos como primitivo (obrigatório no payload)
     private double amount;
+
+    @Schema(description = "Status atualizado pelo servidor", accessMode = Schema.AccessMode.READ_ONLY)
     private String status;
 
     // Construtor vazio (obrigatório para o Jackson/JSON)
