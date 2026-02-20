@@ -35,7 +35,7 @@ public class PayConsumer {
 
         KafkaProducer<String, String> producer = new KafkaProducer<>(prodProps);
 
-        // Register handlers - open for extension
+        
         List<EventHandler> handlers = Arrays.asList(
             new PedidoAprovadoHandler()
         );

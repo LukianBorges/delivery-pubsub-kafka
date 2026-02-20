@@ -35,7 +35,7 @@ public class RestaurantConsumer {
 
         KafkaProducer<String, String> producer = new KafkaProducer<>(producerProps);
 
-        // Register handlers - open for extension: add new handlers without changing this class
+       
         List<EventHandler> handlers = Arrays.asList(
             new OrderCreatedHandler(),
             new PedidoCanceladoHandler()
