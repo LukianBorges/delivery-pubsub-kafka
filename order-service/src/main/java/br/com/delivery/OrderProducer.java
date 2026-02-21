@@ -1,43 +1,33 @@
 package br.com.delivery;
 
-import java.time.LocalDateTime;
-import java.util.Properties;
 import com.delivery.OrderEvent;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.stereotype.Component;
+import java.util.Properties;
 
-public class OrderProducer {
+@Component 
+public class OrderProducer implements OrderMessageProducer {
+
+    private final KafkaProducer<String, String> producer;
+    private final ObjectMapper mapper = new ObjectMapper();
     private static final String TOPIC = "order-created";
 
-    public static void main(String[] args) throws Exception {
-
+    public OrderProducer() {
         Properties props = new Properties();
         props.put("bootstrap.servers", "localhost:9092");
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        this.producer = new KafkaProducer<>(props);
+    }
 
-        Producer<String, String> producer = new KafkaProducer<>(props);
-        ObjectMapper mapper = new ObjectMapper();
-
-        OrderEvent event = new OrderEvent(
-                UUID.randomUUID().toString(),
-                "Ayler",
-                "PK pizzaria",
-                79.90,
-                LocalDateTime.now().toString()
-        );
-
-        String json = mapper.writeValueAsString(event);
-
-        ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC, event.getOrderId(), json);
-
+    // Esse é o método que o OrderService vai chamar!
+    @Override 
+    public void enviarPedido(OrderEvent pedido) throws Exception {
+        String json = mapper.writeValueAsString(pedido);
+        ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC, pedido.getOrderId(), json);
         producer.send(record);
-        producer.close();
-
-        System.out.println("Pedido publicado no Kafka!");
+        System.out.println("Kafka: Pedido [" + pedido.getOrderId() + "] enviado com sucesso!");
     }
 }
