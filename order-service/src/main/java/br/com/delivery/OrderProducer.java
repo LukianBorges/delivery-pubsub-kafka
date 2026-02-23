@@ -1,6 +1,7 @@
 package br.com.delivery;
 
 import com.delivery.OrderEvent;
+import com.delivery.PropertiesProducerConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -15,14 +16,11 @@ public class OrderProducer implements OrderMessageProducer {
     private static final String TOPIC = "order-created";
 
     public OrderProducer() {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        Properties props = PropertiesProducerConfig.getInstance().getProperties();
         this.producer = new KafkaProducer<>(props);
     }
 
-    // Esse é o método que o OrderService vai chamar!
+    
     @Override 
     public void enviarPedido(OrderEvent pedido) throws Exception {
         String json = mapper.writeValueAsString(pedido);
