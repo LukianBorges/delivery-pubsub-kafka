@@ -31,7 +31,7 @@ public class DeliveryConsumer extends AbstractKafkaConsumerConfig{
                 System.out.println("\nPedido saiu para entrega!");
                 System.out.println("Pedido: " + event.getOrderId());
                 System.out.println("Cliente: " + event.getCustomerName());
-                System.out.println("Endereço do restaurante: " + event.getRestaurant());
+                System.out.println("Nome do restaurante: " + event.getRestaurant());
                 System.out.println("Entregador a caminho...");
             }
         }
