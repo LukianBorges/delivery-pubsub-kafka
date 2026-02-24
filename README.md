@@ -36,7 +36,7 @@ A comunicação entre os serviços é puramente assíncrona. Nenhum serviço con
 
 1. **Clonar e Acessar o Projeto**
     ```bash
-    git clone https://github.com/SeuUsuario/delivery-pubsub-kafka.git
+    git clone https://github.com/LukianBorges/delivery-pubsub-kafka.git
     cd delivery-pubsub-kafka
     ```
 
