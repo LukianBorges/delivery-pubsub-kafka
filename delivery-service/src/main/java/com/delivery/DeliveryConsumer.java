@@ -9,19 +9,15 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class DeliveryConsumer {
+public class DeliveryConsumer extends AbstractKafkaConsumerConfig{
 
     public static void main(String[] args) throws Exception {
 
         System.out.println("Serviço de entrega aguardando pedidos pagos...");
+        
+        DeliveryConsumer deliveryConsumer = new DeliveryConsumer();
 
-        Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "delivery-group");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(deliveryConsumer.getConsumerProperties());
         consumer.subscribe(Collections.singletonList("pedido-pago"));
 
         ObjectMapper mapper = new ObjectMapper();
@@ -40,4 +36,10 @@ public class DeliveryConsumer {
             }
         }
     }
+
+	@Override
+	protected void definirPropriedadesEspecificas(Properties props) {
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, "delivery-group");
+		
+	}
 }

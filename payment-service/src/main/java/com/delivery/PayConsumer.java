@@ -12,30 +12,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 
-public class PayConsumer {
+public class PayConsumer extends AbstractKafkaConsumerConfig {
     public static void main(String[] args) throws Exception {
 
         System.out.println("Serviço de pagamento aguardando pedidos aprovados...");
 
-        Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-group");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        PayConsumer payConsumer = new PayConsumer();
 
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(payConsumer.getConsumerProperties());
         consumer.subscribe(Arrays.asList("pedido-aprovado"));
 
         ObjectMapper mapper = new ObjectMapper();
 
-        Properties prodProps = new Properties();
-        prodProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        prodProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        prodProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        Properties prodProps = PropertiesProducerConfig.getInstance().getProperties();
 
         KafkaProducer<String, String> producer = new KafkaProducer<>(prodProps);
 
-        
         List<EventHandler> handlers = Arrays.asList(
             new PedidoAprovadoHandler()
         );
@@ -62,4 +54,11 @@ public class PayConsumer {
 
         }
     }
+
+	@Override
+	protected void definirPropriedadesEspecificas(Properties props) {
+		
+		props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-group");
+		
+	}
 }
